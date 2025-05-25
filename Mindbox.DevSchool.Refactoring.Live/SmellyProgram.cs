@@ -157,7 +157,6 @@ internal class Program
 		var discountService = new DiscountService();
 		var discount = discountService.DoStuff(customer, DateTime.UtcNow);
 
-		// Вывод разрешён только здесь (в UI/композиционном корне)
 		Console.WriteLine($"Discount: {discount}");
 	}
 }
