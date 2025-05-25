@@ -82,6 +82,8 @@ public class Order
 	public DateTime CreatedAt { get; }
 	public Guid Id { get; }
 	public Money Total { get; }
+
+	public bool YoungerThanYear(DateTime dateTimeUtcNow) => (dateTimeUtcNow - CreatedAt).TotalDays < 365;
 }
 
 public static class DiscountService
@@ -121,26 +123,13 @@ public static class DiscountService
 
 	private static decimal CalculateDiscountBasedOnOrderHistory(Customer customer, DateTime dateTimeUtcNow)
 	{
-		decimal d = 0m;
-		var x = 0;
-		var y = 0m;
-		foreach (var o in customer.Orders)
-		{
-			if ((dateTimeUtcNow - o.CreatedAt).TotalDays < 365)
-			{
-				if (o.Total.Amount > 100)
-				{
-					x++;
-					y += o.Total.Amount;
-				}
-			}
-		}
+		var ordersForLastYear = customer.Orders.Where(o => o.YoungerThanYear(dateTimeUtcNow));
+		var highTotalOrders = ordersForLastYear.Where(o => o.Total.Amount > 100).ToArray();
+		var totalsSumOfHighTotalOrders = highTotalOrders.Sum(o => o.Total.Amount);
 
-		if (x > 5 && y > 1000)
-		{
-			d += 0.1m;
-		}
-		return d;
+		return highTotalOrders.Length > 5 && totalsSumOfHighTotalOrders > 1000 
+			? 0.1m 
+			: 0m;
 	}
 
 	private static bool CanCustomerGetPenalty(Customer customer) => customer.Orders.Count < 3;
