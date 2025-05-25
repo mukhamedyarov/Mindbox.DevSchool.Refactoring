@@ -89,6 +89,7 @@ public class DiscountService
 	public Discount DoStuff(Customer c, DateTime dateTimeUtcNow)
 	{
 		decimal d = 0;
+
 		if (c.IsActive && c.Rating.Stars > 3 && c.Orders.Count > 0)
 		{
 			var x = 0;
@@ -110,29 +111,24 @@ public class DiscountService
 				d += 0.1m;
 			}
 
-			if (c.Name.StartsWith("V") && c.Orders.Count > 10 && c.Rating.Stars == 5 ||
-			    c.Orders.Count > 20 && !c.Name.Contains("test") && c.IsActive && c.Rating.Stars >= 4)
+			if ((c.Name.StartsWith("V") && c.Orders.Count > 10 && c.Rating.Stars == 5) ||
+			    (c.Orders.Count > 20 && !c.Name.Contains("test") && c.IsActive && c.Rating.Stars >= 4))
 			{
 				d += 0.15m;
 			}
-			else
+		}
+
+		if (c.Orders.Count < 3)
+		{
+			if (c.Rating.Stars <= 2)
 			{
-				if (c.Orders.Count < 3)
+				d -= 0.05m;
+			}
+			else if (c.Orders.Count == 2)
+			{
+				if (c.Orders[0].Total.Amount < 50 && c.Orders[1].Total.Amount < 50)
 				{
-					if (c.Rating.Stars <= 2)
-					{
-						d -= 0.05m;
-					}
-					else
-					{
-						if (c.Orders.Count == 2)
-						{
-							if (c.Orders[0].Total.Amount < 50 && c.Orders[1].Total.Amount < 50)
-							{
-								d -= 0.02m;
-							}
-						}
-					}
+					d -= 0.02m;
 				}
 			}
 		}
