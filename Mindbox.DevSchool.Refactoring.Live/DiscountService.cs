@@ -4,20 +4,10 @@ public static class DiscountService
 {
 	public static Discount CalculateDiscount(Customer customer, DateTime dateTimeUtcNow)
 	{
-		decimal discount = 0;
+		var discount = GetDiscount(customer, dateTimeUtcNow);
+		var penalty = GetPenalty(customer);
 
-		if (CanCustomerGetDiscount(customer))
-		{
-			discount += CalculateDiscountBasedOnOrderHistory(customer, dateTimeUtcNow);
-			discount += CalculatePersonalDiscount(customer);
-		}
-
-		if (CanCustomerGetPenalty(customer))
-		{
-			discount -= CalculatePenalty(customer);
-		}
-
-		return new Discount(discount);
+		return new Discount(discount - penalty);
 	}
 
 	private static decimal CalculateDiscountBasedOnOrderHistory(Customer customer, DateTime dateTimeUtcNow)
@@ -64,4 +54,23 @@ public static class DiscountService
 		customer.IsActive && customer.Rating.Stars > 3 && customer.Orders.Count > 0;
 
 	private static bool CanCustomerGetPenalty(Customer customer) => customer.Orders.Count < 3;
+
+	private static decimal GetDiscount(Customer customer, DateTime dateTimeUtcNow)
+	{
+		if (!CanCustomerGetDiscount(customer))
+			return 0m;
+
+		var orderHistoryBasedDiscount = CalculateDiscountBasedOnOrderHistory(customer, dateTimeUtcNow);
+		var personalDiscount = CalculatePersonalDiscount(customer);
+
+		return orderHistoryBasedDiscount + personalDiscount;
+	}
+
+	private static decimal GetPenalty(Customer customer)
+	{
+		if (!CanCustomerGetPenalty(customer))
+			return 0;
+
+		return CalculatePenalty(customer);
+	}
 }
