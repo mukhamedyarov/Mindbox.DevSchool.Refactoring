@@ -108,7 +108,8 @@ public static class DiscountService
 
 	private static decimal CalculatePenalty(Customer customer)
 	{
-		if (customer.Rating.Stars <= 2)
+		var customerHasLowRating = customer.Rating.Stars <= 2;
+		if (customerHasLowRating)
 			return 0.05m;
 
 		var firstTwoOrdersAreCheap = customer.Orders.Count >= 2 
