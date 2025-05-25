@@ -86,15 +86,15 @@ public class Order
 
 public static class DiscountService
 {
-	public static Discount DoStuff(Customer c, DateTime dateTimeUtcNow)
+	public static Discount CalculateDiscount(Customer customer, DateTime dateTimeUtcNow)
 	{
 		decimal d = 0;
 
-		if (c.IsActive && c.Rating.Stars > 3 && c.Orders.Count > 0)
+		if (customer.IsActive && customer.Rating.Stars > 3 && customer.Orders.Count > 0)
 		{
 			var x = 0;
 			var y = 0m;
-			foreach (var o in c.Orders)
+			foreach (var o in customer.Orders)
 			{
 				if ((dateTimeUtcNow - o.CreatedAt).TotalDays < 365)
 				{
@@ -111,22 +111,22 @@ public static class DiscountService
 				d += 0.1m;
 			}
 
-			if ((c.Name.StartsWith("V") && c.Orders.Count > 10 && c.Rating.Stars == 5) ||
-			    (c.Orders.Count > 20 && !c.Name.Contains("test") && c.IsActive && c.Rating.Stars >= 4))
+			if ((customer.Name.StartsWith("V") && customer.Orders.Count > 10 && customer.Rating.Stars == 5) ||
+			    (customer.Orders.Count > 20 && !customer.Name.Contains("test") && customer.IsActive && customer.Rating.Stars >= 4))
 			{
 				d += 0.15m;
 			}
 		}
 
-		if (c.Orders.Count < 3)
+		if (customer.Orders.Count < 3)
 		{
-			if (c.Rating.Stars <= 2)
+			if (customer.Rating.Stars <= 2)
 			{
 				d -= 0.05m;
 			}
-			else if (c.Orders.Count == 2)
+			else if (customer.Orders.Count == 2)
 			{
-				if (c.Orders[0].Total.Amount < 50 && c.Orders[1].Total.Amount < 50)
+				if (customer.Orders[0].Total.Amount < 50 && customer.Orders[1].Total.Amount < 50)
 				{
 					d -= 0.02m;
 				}
@@ -150,7 +150,7 @@ internal class Program
 		customer.AddOrder(new Order(Guid.NewGuid(), DateTime.Now.AddMonths(-6), new Money(100)));
 		customer.AddOrder(new Order(Guid.NewGuid(), DateTime.Now.AddMonths(-7), new Money(200)));
 		
-		var discount = DiscountService.DoStuff(customer, DateTime.UtcNow);
+		var discount = DiscountService.CalculateDiscount(customer, DateTime.UtcNow);
 
 		Console.WriteLine($"Discount: {discount}");
 	}
