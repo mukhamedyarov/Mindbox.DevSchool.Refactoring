@@ -62,7 +62,7 @@ internal class X
 						if (name.StartsWith("A") && name.Length > 3 && !name.Contains("xyz") && age % 2 == 0 &&
 						    name.ToLower() != "admin")
 						{
-							Console.WriteLine($"Valid user: {name}, age: {age}");
+							Console.WriteLine($"Sending email to valid user: {name}, age: {age}...");
 						}
 						else
 						{
