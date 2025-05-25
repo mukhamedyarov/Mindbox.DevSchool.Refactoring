@@ -5,7 +5,7 @@ internal class SmellyProgram
 	private static void Main(string[] args)
 	{
 		var p = new P();
-		p.P1(); // 4. Непонятные имена
+		p.P1();
 	}
 }
 
@@ -17,8 +17,8 @@ internal class P
 	{
 		Console.WriteLine("Generating order report...");
 
-		// 1. Длинный метод
-		var raw = GetOrdersFromDb(); // 2. Высокий уровень абстракции в низкоуровневом методе
+		
+		var raw = GetOrdersFromDb(); 
 		foreach (var r in raw)
 		{
 			var parts = r.Split('-');
@@ -31,7 +31,6 @@ internal class P
 
 			if (int.TryParse(quantityString, out var quantity))
 			{
-				// 6. Сложное условие
 				if (!string.IsNullOrEmpty(id) && product.Length > 2 && quantity > 0 && !product.Contains("XYZ"))
 				{
 					if (product.ToLower().StartsWith("a"))
@@ -42,7 +41,7 @@ internal class P
 						}
 						else
 						{
-							LogInvalid(id); // 3. Метод работает корректно только в контексте вызова из P1
+							LogInvalid(id); 
 						}
 					}
 					else
@@ -61,7 +60,6 @@ internal class P
 	}
 
 	private List<string> GetOrdersFromDb() =>
-		// Эмуляция источника данных
 		new()
 		{
 			"O1-apple-5",
