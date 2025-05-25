@@ -100,20 +100,25 @@ public static class DiscountService
 
 		if (CanCustomerGetPenalty(customer))
 		{
-			if (customer.Rating.Stars <= 2)
-			{
-				d -= 0.05m;
-			}
-			else if (customer.Orders.Count == 2)
-			{
-				if (customer.Orders[0].Total.Amount < 50 && customer.Orders[1].Total.Amount < 50)
-				{
-					d -= 0.02m;
-				}
-			}
+			d -= CalculatePenalty(customer);
 		}
 
 		return new Discount(d);
+	}
+
+	private static decimal CalculatePenalty(Customer customer)
+	{
+		if (customer.Rating.Stars <= 2)
+			return 0.05m;
+
+		var firstTwoOrdersAreCheap = customer.Orders.Count >= 2 
+			&& customer.Orders[0].Total.Amount < 50 
+			&& customer.Orders[1].Total.Amount < 50;
+
+		if (firstTwoOrdersAreCheap)
+			return 0.02m;
+
+		return 0;
 	}
 
 	private static decimal CalculatePersonalDiscount(Customer customer)
