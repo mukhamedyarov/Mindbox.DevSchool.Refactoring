@@ -82,63 +82,73 @@ public class Order
 	public DateTime CreatedAt { get; }
 	public Guid Id { get; }
 	public Money Total { get; }
+
+	public bool YoungerThanYear(DateTime dateTimeUtcNow) => (dateTimeUtcNow - CreatedAt).TotalDays < 365;
 }
 
-public class DiscountService
+public static class DiscountService
 {
-	public Discount DoStuff(Customer c, DateTime dateTimeUtcNow)
+	public static Discount CalculateDiscount(Customer customer, DateTime dateTimeUtcNow)
 	{
-		decimal d = 0;
-		if (c.IsActive && c.Rating.Stars > 3 && c.Orders.Count > 0)
+		decimal discount = 0;
+
+		if (CanCustomerGetDiscount(customer))
 		{
-			var x = 0;
-			var y = 0m;
-			foreach (var o in c.Orders)
-			{
-				if ((dateTimeUtcNow - o.CreatedAt).TotalDays < 365)
-				{
-					if (o.Total.Amount > 100)
-					{
-						x++;
-						y += o.Total.Amount;
-					}
-				}
-			}
-
-			if (x > 5 && y > 1000)
-			{
-				d += 0.1m;
-			}
-
-			if (c.Name.StartsWith("V") && c.Orders.Count > 10 && c.Rating.Stars == 5 ||
-			    c.Orders.Count > 20 && !c.Name.Contains("test") && c.IsActive && c.Rating.Stars >= 4)
-			{
-				d += 0.15m;
-			}
-			else
-			{
-				if (c.Orders.Count < 3)
-				{
-					if (c.Rating.Stars <= 2)
-					{
-						d -= 0.05m;
-					}
-					else
-					{
-						if (c.Orders.Count == 2)
-						{
-							if (c.Orders[0].Total.Amount < 50 && c.Orders[1].Total.Amount < 50)
-							{
-								d -= 0.02m;
-							}
-						}
-					}
-				}
-			}
+			discount += CalculateDiscountBasedOnOrderHistory(customer, dateTimeUtcNow);
+			discount += CalculatePersonalDiscount(customer);
 		}
 
-		return new Discount(d);
+		if (CanCustomerGetPenalty(customer))
+		{
+			discount -= CalculatePenalty(customer);
+		}
+
+		return new Discount(discount);
 	}
+
+	private static decimal CalculatePenalty(Customer customer)
+	{
+		var customerHasLowRating = customer.Rating.Stars <= 2;
+		if (customerHasLowRating)
+			return 0.05m;
+
+		var firstTwoOrdersAreCheap = customer.Orders.Count >= 2 
+			&& customer.Orders[0].Total.Amount < 50 
+			&& customer.Orders[1].Total.Amount < 50;
+
+		if (firstTwoOrdersAreCheap)
+			return 0.02m;
+
+		return 0;
+	}
+
+	private static decimal CalculatePersonalDiscount(Customer customer)
+	{
+		var isVCustomer = customer.Name.StartsWith("V");
+		var canVCustomerGetDiscount = customer.Orders.Count > 10 && customer.Rating.Stars == 5;
+
+		var isTestCustomer = customer.Name.Contains("test");
+		var canNotTestCustomerGetDiscount = customer.Orders.Count > 20 && customer.IsActive && customer.Rating.Stars >= 4;
+
+		return isVCustomer && canVCustomerGetDiscount || !isTestCustomer && canNotTestCustomerGetDiscount
+			? 0.15m
+			: 0m;
+	}
+
+	private static decimal CalculateDiscountBasedOnOrderHistory(Customer customer, DateTime dateTimeUtcNow)
+	{
+		var ordersForLastYear = customer.Orders.Where(o => o.YoungerThanYear(dateTimeUtcNow));
+		var highTotalOrders = ordersForLastYear.Where(o => o.Total.Amount > 100).ToArray();
+		var totalsSumOfHighTotalOrders = highTotalOrders.Sum(o => o.Total.Amount);
+
+		return highTotalOrders.Length > 5 && totalsSumOfHighTotalOrders > 1000 
+			? 0.1m 
+			: 0m;
+	}
+
+	private static bool CanCustomerGetPenalty(Customer customer) => customer.Orders.Count < 3;
+
+	private static bool CanCustomerGetDiscount(Customer customer) => customer.IsActive && customer.Rating.Stars > 3 && customer.Orders.Count > 0;
 }
 
 internal class Program
@@ -153,9 +163,8 @@ internal class Program
 		customer.AddOrder(new Order(Guid.NewGuid(), DateTime.Now.AddMonths(-5), new Money(120)));
 		customer.AddOrder(new Order(Guid.NewGuid(), DateTime.Now.AddMonths(-6), new Money(100)));
 		customer.AddOrder(new Order(Guid.NewGuid(), DateTime.Now.AddMonths(-7), new Money(200)));
-
-		var discountService = new DiscountService();
-		var discount = discountService.DoStuff(customer, DateTime.UtcNow);
+		
+		var discount = DiscountService.CalculateDiscount(customer, DateTime.UtcNow);
 
 		Console.WriteLine($"Discount: {discount}");
 	}
