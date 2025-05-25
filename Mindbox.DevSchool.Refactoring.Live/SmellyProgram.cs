@@ -94,13 +94,8 @@ public static class DiscountService
 
 		if (CanCustomerGetDiscount(customer))
 		{
-			d = CalculateDiscountBasedOnOrderHistory(customer, dateTimeUtcNow);
-
-			if ((customer.Name.StartsWith("V") && customer.Orders.Count > 10 && customer.Rating.Stars == 5) ||
-			    (customer.Orders.Count > 20 && !customer.Name.Contains("test") && customer.IsActive && customer.Rating.Stars >= 4))
-			{
-				d += 0.15m;
-			}
+			d += CalculateDiscountBasedOnOrderHistory(customer, dateTimeUtcNow);
+			d += CalculatePersonalDiscount(customer);
 		}
 
 		if (CanCustomerGetPenalty(customer))
@@ -119,6 +114,14 @@ public static class DiscountService
 		}
 
 		return new Discount(d);
+	}
+
+	private static decimal CalculatePersonalDiscount(Customer customer)
+	{
+		return customer.Name.StartsWith("V") && customer.Orders.Count > 10 && customer.Rating.Stars == 5 ||
+			customer.Orders.Count > 20 && !customer.Name.Contains("test") && customer.IsActive && customer.Rating.Stars >= 4
+				? 0.15m
+				: 0m;
 	}
 
 	private static decimal CalculateDiscountBasedOnOrderHistory(Customer customer, DateTime dateTimeUtcNow)
