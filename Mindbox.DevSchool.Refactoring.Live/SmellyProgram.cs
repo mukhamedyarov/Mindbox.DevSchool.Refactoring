@@ -90,7 +90,7 @@ public static class DiscountService
 	{
 		decimal d = 0;
 
-		if (customer.IsActive && customer.Rating.Stars > 3 && customer.Orders.Count > 0)
+		if (CanCustomerGetDiscount(customer))
 		{
 			var x = 0;
 			var y = 0m;
@@ -118,7 +118,7 @@ public static class DiscountService
 			}
 		}
 
-		if (customer.Orders.Count < 3)
+		if (CanCustomerGetPenalty(customer))
 		{
 			if (customer.Rating.Stars <= 2)
 			{
@@ -135,6 +135,10 @@ public static class DiscountService
 
 		return new Discount(d);
 	}
+
+	private static bool CanCustomerGetPenalty(Customer customer) => customer.Orders.Count < 3;
+
+	private static bool CanCustomerGetDiscount(Customer customer) => customer.IsActive && customer.Rating.Stars > 3 && customer.Orders.Count > 0;
 }
 
 internal class Program
