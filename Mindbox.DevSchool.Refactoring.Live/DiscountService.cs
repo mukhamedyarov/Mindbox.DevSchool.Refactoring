@@ -13,10 +13,10 @@ public static class DiscountService
 	private static decimal CalculateDiscountBasedOnOrderHistory(Customer customer, DateTime dateTimeUtcNow)
 	{
 		var ordersForLastYear = customer.Orders.Where(o => o.YoungerThanYear(dateTimeUtcNow));
-		var highTotalOrders = ordersForLastYear.Where(o => o.Total.Amount > 100).ToArray();
-		var totalsSumOfHighTotalOrders = highTotalOrders.Sum(o => o.Total.Amount);
+		var expensiveOrders = ordersForLastYear.Where(o => o.Total.Amount > 100).ToArray();
+		var expensiveOrdersTotalSum = expensiveOrders.Sum(o => o.Total.Amount);
 
-		return highTotalOrders.Length > 5 && totalsSumOfHighTotalOrders > 1000
+		return expensiveOrders.Length > 5 && expensiveOrdersTotalSum > 1000
 			? 0.1m
 			: 0m;
 	}
