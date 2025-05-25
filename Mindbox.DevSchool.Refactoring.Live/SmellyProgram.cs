@@ -2,7 +2,7 @@
 
 internal class SmellyProgram
 {
-	private static void FakeMain(string[] args)
+	private static void Main(string[] args)
 	{
 		var p = new P();
 		p.P1(); // 4. Непонятные имена
