@@ -84,9 +84,9 @@ public class Order
 	public Money Total { get; }
 }
 
-public class DiscountService
+public static class DiscountService
 {
-	public Discount DoStuff(Customer c, DateTime dateTimeUtcNow)
+	public static Discount DoStuff(Customer c, DateTime dateTimeUtcNow)
 	{
 		decimal d = 0;
 
@@ -149,9 +149,8 @@ internal class Program
 		customer.AddOrder(new Order(Guid.NewGuid(), DateTime.Now.AddMonths(-5), new Money(120)));
 		customer.AddOrder(new Order(Guid.NewGuid(), DateTime.Now.AddMonths(-6), new Money(100)));
 		customer.AddOrder(new Order(Guid.NewGuid(), DateTime.Now.AddMonths(-7), new Money(200)));
-
-		var discountService = new DiscountService();
-		var discount = discountService.DoStuff(customer, DateTime.UtcNow);
+		
+		var discount = DiscountService.DoStuff(customer, DateTime.UtcNow);
 
 		Console.WriteLine($"Discount: {discount}");
 	}

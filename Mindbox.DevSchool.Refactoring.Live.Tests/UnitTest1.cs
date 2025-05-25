@@ -6,8 +6,6 @@ namespace SmellyCodeTests;
 
 public class DiscountServiceTests
 {
-	private readonly DiscountService _service = new();
-
 	[Fact]
 	public void Should_ApplyHighOrderDiscount_When_ManyLargeRecentOrders()
 	{
@@ -22,7 +20,7 @@ public class DiscountServiceTests
 		};
 		var customer = CreateCustomer("Alice", 4, true, orders);
 
-		var discount = _service.DoStuff(customer, DateTime.UtcNow);
+		var discount = DiscountService.DoStuff(customer, DateTime.UtcNow);
 
 		discount.Percentage.Should().Be(0.10m);
 	}
@@ -38,7 +36,7 @@ public class DiscountServiceTests
 
 		var customer = CreateCustomer("Victor", 5, true, orders);
 
-		var discount = _service.DoStuff(customer, DateTime.UtcNow);
+		var discount = DiscountService.DoStuff(customer, DateTime.UtcNow);
 
 		discount.Percentage.Should().BeGreaterThan(0.10m);
 		discount.Percentage.Should().BeApproximately(0.25m, 0.001m);
@@ -49,7 +47,7 @@ public class DiscountServiceTests
 	{
 		var customer = CreateCustomer("Test", 5, true, new List<(DateTime, decimal)>());
 
-		var discount = _service.DoStuff(customer, DateTime.UtcNow);
+		var discount = DiscountService.DoStuff(customer, DateTime.UtcNow);
 
 		discount.Percentage.Should().Be(0m);
 	}
@@ -63,7 +61,7 @@ public class DiscountServiceTests
 		};
 		var customer = CreateCustomer("LowGuy", 1, true, orders);
 
-		var discount = _service.DoStuff(customer, DateTime.UtcNow);
+		var discount = DiscountService.DoStuff(customer, DateTime.UtcNow);
 
 		discount.Percentage.Should().BeLessThan(0m); // Negative discount (penalty)
 	}
@@ -73,7 +71,7 @@ public class DiscountServiceTests
 	{
 		var customer = CreateCustomer("Bob", 5, false, new List<(DateTime, decimal)>());
 
-		var discount = _service.DoStuff(customer, DateTime.UtcNow);
+		var discount = DiscountService.DoStuff(customer, DateTime.UtcNow);
 
 		discount.Percentage.Should().Be(0m);
 	}
