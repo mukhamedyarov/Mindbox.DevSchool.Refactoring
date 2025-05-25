@@ -92,24 +92,7 @@ public static class DiscountService
 
 		if (CanCustomerGetDiscount(customer))
 		{
-			var x = 0;
-			var y = 0m;
-			foreach (var o in customer.Orders)
-			{
-				if ((dateTimeUtcNow - o.CreatedAt).TotalDays < 365)
-				{
-					if (o.Total.Amount > 100)
-					{
-						x++;
-						y += o.Total.Amount;
-					}
-				}
-			}
-
-			if (x > 5 && y > 1000)
-			{
-				d += 0.1m;
-			}
+			d = CalculateDiscountBasedOnOrderHistory(customer, dateTimeUtcNow);
 
 			if ((customer.Name.StartsWith("V") && customer.Orders.Count > 10 && customer.Rating.Stars == 5) ||
 			    (customer.Orders.Count > 20 && !customer.Name.Contains("test") && customer.IsActive && customer.Rating.Stars >= 4))
@@ -134,6 +117,30 @@ public static class DiscountService
 		}
 
 		return new Discount(d);
+	}
+
+	private static decimal CalculateDiscountBasedOnOrderHistory(Customer customer, DateTime dateTimeUtcNow)
+	{
+		decimal d = 0m;
+		var x = 0;
+		var y = 0m;
+		foreach (var o in customer.Orders)
+		{
+			if ((dateTimeUtcNow - o.CreatedAt).TotalDays < 365)
+			{
+				if (o.Total.Amount > 100)
+				{
+					x++;
+					y += o.Total.Amount;
+				}
+			}
+		}
+
+		if (x > 5 && y > 1000)
+		{
+			d += 0.1m;
+		}
+		return d;
 	}
 
 	private static bool CanCustomerGetPenalty(Customer customer) => customer.Orders.Count < 3;
