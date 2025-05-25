@@ -118,10 +118,15 @@ public static class DiscountService
 
 	private static decimal CalculatePersonalDiscount(Customer customer)
 	{
-		return customer.Name.StartsWith("V") && customer.Orders.Count > 10 && customer.Rating.Stars == 5 ||
-			customer.Orders.Count > 20 && !customer.Name.Contains("test") && customer.IsActive && customer.Rating.Stars >= 4
-				? 0.15m
-				: 0m;
+		var isVCustomer = customer.Name.StartsWith("V");
+		var canVCustomerGetDiscount = customer.Orders.Count > 10 && customer.Rating.Stars == 5;
+
+		var isTestCustomer = customer.Name.Contains("test");
+		var canNotTestCustomerGetDiscount = customer.Orders.Count > 20 && customer.IsActive && customer.Rating.Stars >= 4
+
+		return isVCustomer && canVCustomerGetDiscount || !isTestCustomer && canNotTestCustomerGetDiscount
+			? 0.15m
+			: 0m;
 	}
 
 	private static decimal CalculateDiscountBasedOnOrderHistory(Customer customer, DateTime dateTimeUtcNow)
