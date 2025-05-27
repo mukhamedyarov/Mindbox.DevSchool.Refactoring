@@ -120,7 +120,7 @@ public class DiscountService
 			{
 				d -= 0.05m;
 			}
-			else if (c.Orders.Count == 2)
+			else if (c.Orders.Count >= 2)
 			{
 				if (c.Orders[0].Total.Amount < 50 && c.Orders[1].Total.Amount < 50)
 				{
