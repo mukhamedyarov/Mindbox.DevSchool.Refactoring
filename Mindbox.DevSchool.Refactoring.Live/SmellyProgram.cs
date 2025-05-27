@@ -111,11 +111,7 @@ public class DiscountService
 				d += 0.1m;
 			}
 
-			if ((c.Name.StartsWith("V") && c.Orders.Count > 10 && c.Rating.Stars == 5) ||
-			    (c.Orders.Count > 20 && !c.Name.Contains("test") && c.IsActive && c.Rating.Stars >= 4))
-			{
-				d += 0.15m;
-			}
+			d += GetPd(c);
 		}
 
 		if (c.Orders.Count < 3)
@@ -134,6 +130,17 @@ public class DiscountService
 		}
 
 		return new Discount(d);
+	}
+
+	private static decimal GetPd(Customer c)
+	{
+
+		if ((c.Name.StartsWith("V") && c.Orders.Count > 10 && c.Rating.Stars == 5) ||
+		    (c.Orders.Count > 20 && !c.Name.Contains("test") && c.IsActive && c.Rating.Stars >= 4))
+		{
+			return 0.15m;
+		}
+		return 0m;
 	}
 }
 
